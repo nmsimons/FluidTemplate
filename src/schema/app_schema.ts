@@ -29,7 +29,7 @@ export class Thing extends sf.object(
 	},
 ) {}
 
-// Schema for a list of Notes and Groups.
+// Schema for a thing.
 export class Items extends sf.array("Items", [() => Thing]) {
 	public readonly addThing = () => {
 		// create an array with a million random numbers
