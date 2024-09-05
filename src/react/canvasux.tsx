@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Note, Group, Items } from "../schema/app_schema.js";
+import { Items, Thing } from "../schema/app_schema.js";
 import { Session } from "../schema/session_schema.js";
 import {
 	ConnectionState,
@@ -14,18 +14,14 @@ import {
 	Tree,
 	TreeView,
 } from "fluid-framework";
-import { GroupView } from "./groupux.js";
-import { AddNoteButton, NoteView, RootNoteWrapper } from "./noteux.js";
 import {
 	Floater,
-	NewGroupButton,
-	NewNoteButton,
-	DeleteNotesButton,
+	NewButton,
 	ButtonGroup,
 	UndoButton,
 	RedoButton,
+	DeleteButton,
 } from "./buttonux.js";
-import { undefinedUserId } from "../utils/utils.js";
 import { undoRedo } from "../utils/undo.js";
 
 export function Canvas(props: {
@@ -80,7 +76,7 @@ export function Canvas(props: {
 		if (props.audience.getMyself()?.id == undefined) return;
 		if (props.audience.getMembers() == undefined) return;
 		if (props.container.connectionState !== ConnectionState.Connected) return;
-		if (props.currentUser == undefinedUserId) {
+		if (props.currentUser == "") {
 			const user = props.audience.getMyself()?.id;
 			if (typeof user === "string") {
 				props.setCurrentUser(user);
@@ -107,16 +103,13 @@ export function Canvas(props: {
 			/>
 			<Floater>
 				<ButtonGroup>
-					<NewGroupButton
-						items={props.items.root}
-						session={props.sessionTree.root}
-						clientId={props.currentUser}
-					/>
-					<NewNoteButton items={props.items.root} clientId={props.currentUser} />
-					<DeleteNotesButton
-						session={props.sessionTree.root}
-						items={props.items.root}
-						clientId={props.currentUser}
+					<NewButton items={props.items.root} clientId={props.currentUser} />
+				</ButtonGroup>
+				<ButtonGroup>
+					<DeleteButton
+						delete={() => {
+							props.items.root = [];
+						}}
 					/>
 				</ButtonGroup>
 				<ButtonGroup>
@@ -135,57 +128,26 @@ export function ItemsView(props: {
 	fluidMembers: string[];
 	isRoot: boolean;
 }): JSX.Element {
-	const pilesArray = [];
+	const things = [];
 	for (const i of props.items) {
-		if (Tree.is(i, Group)) {
-			pilesArray.push(
-				<GroupView
-					key={i.id}
-					group={i}
-					clientId={props.clientId}
-					parent={props.items}
-					session={props.session}
-					fluidMembers={props.fluidMembers}
-				/>,
-			);
-		} else if (Tree.is(i, Note)) {
-			if (props.isRoot) {
-				pilesArray.push(
-					<RootNoteWrapper
-						key={i.id}
-						note={i}
-						clientId={props.clientId}
-						parent={props.items}
-						session={props.session}
-						fluidMembers={props.fluidMembers}
-					/>,
-				);
-			} else {
-				pilesArray.push(
-					<NoteView
-						key={i.id}
-						note={i}
-						clientId={props.clientId}
-						parent={props.items}
-						session={props.session}
-						fluidMembers={props.fluidMembers}
-					/>,
-				);
-			}
-		}
+		things.push(<ThingView key={i.id} thing={i} />);
 	}
+	return (
+		<div className="flex grow-0 flex-row h-full w-full flex-wrap gap-4 p-4 content-start overflow-y-scroll">
+			{things}
+			<div className="flex w-full h-24"></div>
+		</div>
+	);
+}
 
-	if (props.isRoot) {
-		return (
-			<div className="flex grow-0 flex-row h-full w-full flex-wrap gap-4 p-4 content-start overflow-y-scroll">
-				{pilesArray}
-				<div className="flex w-full h-24"></div>
+export function ThingView(props: { thing: Thing }): JSX.Element {
+	return (
+		<div className="flex flex-col bg-transparent w-48 h-48 rounded-lg border-black border-4">
+			<div className="flex flex-col bg-transparent p-2">
+				<div className="flex flex-row bg-transparent">
+					<div className="flex bg-transparent">{props.thing.text}</div>
+				</div>
 			</div>
-		);
-	} else {
-		pilesArray.push(
-			<AddNoteButton key="newNote" parent={props.items} clientId={props.clientId} />,
-		);
-		return <div className="flex flex-row flex-wrap gap-8 p-2">{pilesArray}</div>;
-	}
+		</div>
+	);
 }

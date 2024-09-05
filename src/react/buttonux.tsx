@@ -4,58 +4,13 @@
  */
 
 import React from "react";
-import { Items, Note } from "../schema/app_schema.js";
-import { moveItem, findNote } from "../utils/app_helpers.js";
-import {
-	ThumbLikeFilled,
-	DismissFilled,
-	NoteRegular,
-	DeleteRegular,
-	RectangleLandscapeRegular,
-	ArrowUndoFilled,
-	ArrowRedoFilled,
-} from "@fluentui/react-icons";
-import { Session } from "../schema/session_schema.js";
-import { getSelectedNotes } from "../utils/session_helpers.js";
-import { Tree } from "fluid-framework";
+import { Items } from "../schema/app_schema.js";
+import { ArrowUndoFilled, ArrowRedoFilled, DeleteFilled, AddFilled } from "@fluentui/react-icons";
 
-export function NewGroupButton(props: {
-	items: Items;
-	session: Session;
-	clientId: string;
-}): JSX.Element {
+export function NewButton(props: { items: Items; clientId: string }): JSX.Element {
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		// Wrap the add group operation in a transaction as it adds a group and potentially moves
-		// multiple notes into the group and we want to ensure that the operation is atomic.
-		// This ensures that the revertible of the operation will undo all the changes made by the operation.
-		Tree.runTransaction(props.items, () => {
-			const group = props.items.addGroup("[new group]");
-			const ids = getSelectedNotes(props.session, props.clientId);
-			for (const id of ids) {
-				const n = findNote(props.items, id);
-				if (Tree.is(n, Note)) {
-					moveItem(n, Infinity, group.items);
-				}
-			}
-		});
-	};
-	return (
-		<IconButton
-			color="white"
-			background="black"
-			handleClick={(e: React.MouseEvent) => handleClick(e)}
-			icon={<RectangleLandscapeRegular />}
-		>
-			Add Group
-		</IconButton>
-	);
-}
-
-export function NewNoteButton(props: { items: Items; clientId: string }): JSX.Element {
-	const handleClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		props.items.addNode(props.clientId);
+		props.items.addThing();
 	};
 
 	return (
@@ -63,38 +18,9 @@ export function NewNoteButton(props: { items: Items; clientId: string }): JSX.El
 			color="white"
 			background="black"
 			handleClick={(e: React.MouseEvent) => handleClick(e)}
-			icon={<NoteRegular />}
+			icon={<AddFilled />}
 		>
-			Add Note
-		</IconButton>
-	);
-}
-
-export function DeleteNotesButton(props: {
-	session: Session;
-	items: Items;
-	clientId: string;
-}): JSX.Element {
-	const handleClick = () => {
-		// Wrap the delete operation in a transaction as it potentially modifies multiple notes
-		// and we want to ensure that the operation is atomic. This ensures that the revertible of
-		// the operation will undo all the changes made by the operation.
-		Tree.runTransaction(props.items, () => {
-			const ids = getSelectedNotes(props.session, props.clientId);
-			for (const i of ids) {
-				const n = findNote(props.items, i);
-				n?.delete();
-			}
-		});
-	};
-	return (
-		<IconButton
-			color="white"
-			background="black"
-			handleClick={() => handleClick()}
-			icon={<DeleteRegular />}
-		>
-			Delete Note
+			Add Thing
 		</IconButton>
 	);
 }
@@ -125,22 +51,16 @@ export function RedoButton(props: { redo: () => void }): JSX.Element {
 	);
 }
 
-export function DeleteButton(props: {
-	handleClick: (value: React.MouseEvent) => void;
-}): JSX.Element {
-	const handleClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		props.handleClick(e);
-	};
+export function DeleteButton(props: { delete: () => void }): JSX.Element {
 	return (
-		<button
-			className={
-				"bg-transparent hover:bg-gray-600 text-black hover:text-white font-bold px-2 py-1 rounded inline-flex items-center h-6"
-			}
-			onClick={(e) => handleClick(e)}
+		<IconButton
+			color="white"
+			background="black"
+			handleClick={() => props.delete()}
+			icon={<DeleteFilled />}
 		>
-			{MiniX()}
-		</button>
+			Clear
+		</IconButton>
 	);
 }
 
@@ -183,14 +103,6 @@ function IconButtonText(props: { children: React.ReactNode }): JSX.Element {
 	} else {
 		return <span className="text-sm pl-2 leading-none">{props.children}</span>;
 	}
-}
-
-function MiniX(): JSX.Element {
-	return <DismissFilled />;
-}
-
-export function MiniThumb(): JSX.Element {
-	return <ThumbLikeFilled />;
 }
 
 export function ButtonGroup(props: { children: React.ReactNode }): JSX.Element {

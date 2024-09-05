@@ -9,7 +9,6 @@ import { Items } from "../schema/app_schema.js";
 import { Session } from "../schema/session_schema.js";
 import "../output.css";
 import { IFluidContainer, IMember, IServiceAudience, TreeView } from "fluid-framework";
-import { undefinedUserId } from "../utils/utils.js";
 import { Canvas } from "./canvasux.js";
 import { undoRedo } from "../utils/undo.js";
 
@@ -20,7 +19,7 @@ export function ReactApp(props: {
 	container: IFluidContainer;
 	undoRedo: undoRedo;
 }): JSX.Element {
-	const [currentUser, setCurrentUser] = useState(undefinedUserId);
+	const [currentUser, setCurrentUser] = useState("");
 	const [connectionState, setConnectionState] = useState("");
 	const [saved, setSaved] = useState(false);
 	const [fluidMembers, setFluidMembers] = useState<string[]>([]);
@@ -68,7 +67,7 @@ export function Header(props: {
 }): JSX.Element {
 	return (
 		<div className="h-[48px] flex shrink-0 flex-row items-center justify-between bg-black text-base text-white z-40 w-full">
-			<div className="flex m-2">Brainstorm</div>
+			<div className="flex m-2">Sample</div>
 			<div className="flex m-2 ">
 				{props.saved ? "saved" : "not saved"} | {props.connectionState} | users:{" "}
 				{props.fluidMembers.length}
