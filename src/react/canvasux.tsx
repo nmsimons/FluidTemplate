@@ -145,7 +145,7 @@ export function ThingView(props: { thing: Thing }): JSX.Element {
 		<div className="flex flex-col bg-transparent w-48 h-48 rounded-lg border-black border-4">
 			<div className="flex flex-col bg-transparent p-2">
 				<div className="flex flex-row bg-transparent">
-					<div className="flex bg-transparent">{props.thing.text}</div>
+					<div className="flex bg-transparent">{props.thing.id}</div>
 				</div>
 			</div>
 		</div>

@@ -25,14 +25,24 @@ export class Thing extends sf.object(
 		 */
 		id: sf.identifier,
 		text: sf.string,
+		array: sf.array(sf.number),
 	},
 ) {}
 
 // Schema for a list of Notes and Groups.
 export class Items extends sf.array("Items", [() => Thing]) {
 	public readonly addThing = () => {
+		// create an array with a million random numbers
+		const randomArray = Array.from({ length: 1000000 }, () =>
+			Math.floor(Math.random() * 1000000),
+		);
+
+		// create a string with the numbers in randomArray
+		const randomString = randomArray.join("");
+
 		const thing = new Thing({
-			text: "",
+			text: randomString,
+			array: randomArray,
 		});
 
 		// Insert the note into the SharedTree.
